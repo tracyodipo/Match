@@ -1,0 +1,10 @@
+[
+  {"donor":"Citi Foundation","opp":"2026 Housing Affordability Breakthrough Challenge","cause":"affordable-housing","score":0.95,"isNew":true,"amount":2000000,"rationale":"OPEN signal [Citi Foundation $20M Housing Supply RFP] — apply now."},
+  {"donor":"Wells Fargo Foundation","opp":"2026 Housing Affordability Breakthrough Challenge","cause":"affordable-housing","score":0.95,"isNew":true,"amount":2000000,"rationale":"OPEN signal [Wells Fargo Housing Affordability Breakthrough Challenge] — apply now."},
+  {"donor":"OpenAI Foundation","opp":"2026 People-First AI Fund","cause":"tech-for-good","score":0.95,"isNew":true,"amount":500000,"rationale":"OPEN signal [2026 People-First AI Fund: $50M for nonprofits using AI] — apply now."},
+  {"donor":"Open Philanthropy","opp":"RFP: Global Health and Wellbeing in an Era of Transformative AI","cause":"global-health","score":0.95,"isNew":true,"amount":30000000,"rationale":"OPEN signal [Open Philanthropy $10-30M RFP: Global Health and AI] — apply now."},
+  {"donor":"Bill & Melinda Gates Foundation","opp":"Khan Academy Learners Fund — Expanding AI-Powered Tutoring","cause":"education","score":0.95,"isNew":true,"amount":25000000,"rationale":"OPEN signal [$8M Open Source AI Model for K-12 Math Tutoring RFP] — apply now."},
+  {"donor":"National Endowment for the Arts","opp":"Studio Museum in Harlem Capital Campaign","cause":"arts-culture","score":0.95,"isNew":true,"amount":300000000,"rationale":"OPEN signal [Grants for Arts Projects FY2027 — Deadline July 9, 2026] — apply now."},
+  {"donor":"SAMHSA","opp":"FY 2026 Children's Mental Health Initiative (CMHI)","cause":"mental-health","score":0.95,"isNew":false,"amount":4000000,"rationale":"OPEN signal [$69.1M in FY2026 Mental Health Grant Programs] — apply now."},
+  {"donor":"MacKenzie Scott","opp":"USDA Community Food Projects Competitive Grants","cause":"food-security","score":0.95,"isNew":false,"amount":400000,"rationale":"OPEN signal [Yield Giving — Unrestricted Gifts to Food Security] — apply now."}
+]

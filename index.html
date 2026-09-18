@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy"
+  content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' https://YOUR_PROXY_URL; img-src 'self' data:;">
+<title>Philanthropy Connect — Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/src/styles.css">
+</head>
+<body>
+
+<!-- ═══ AUTH ═══════════════════════════════════════════════════════════════ -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">Philanthropy<span>Connect</span></div>
+    <div class="auth-tagline">Funding intelligence for grant-seekers</div>
+    <div class="auth-field">
+      <label class="auth-label" for="auth-email">Email</label>
+      <input class="auth-input" id="auth-email" type="email" placeholder="you@organization.org" autocomplete="username">
+    </div>
+    <div class="auth-field">
+      <label class="auth-label" for="auth-pass">Password</label>
+      <input class="auth-input" id="auth-pass" type="password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="auth-btn" id="login-btn">Sign in</button>
+    <div class="auth-error" id="auth-error"></div>
+    <div class="auth-hint">Demo: admin@philanthropyconnect.org / connect2026</div>
+  </div>
+</div>
+
+<!-- ═══ APP SHELL ══════════════════════════════════════════════════════════ -->
+<div id="app">
+
+  <div class="sidebar sidebar-rel" id="sidebar">
+    <div class="sidebar-top">
+      <div class="sidebar-brand">Philanthropy<span>Connect</span></div>
+    </div>
+    <button class="sidebar-toggle" id="sidebar-toggle" title="Toggle sidebar">⟨</button>
+
+    <div class="nav-section">
+      <div class="nav-label">Home</div>
+      <button class="nav-item active" id="nav-home">
+        <span class="nav-icon">🏠</span><span class="nav-text">Home</span>
+      </button>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Discover</div>
+      <button class="nav-item" id="nav-opps">
+        <span class="nav-icon">🎯</span><span class="nav-text">Open Opportunities</span>
+        <span class="nav-badge">21</span>
+      </button>
+      <button class="nav-item" id="nav-signals">
+        <span class="nav-icon">⚡</span><span class="nav-text">Donor Signals</span>
+        <span class="nav-badge">33</span>
+      </button>
+      <button class="nav-item" id="nav-matches">
+        <span class="nav-icon">🔗</span><span class="nav-text">Matches</span>
+        <span class="nav-badge">45</span>
+      </button>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Act</div>
+      <button class="nav-item" id="nav-outreach">
+        <span class="nav-icon">✉️</span><span class="nav-text">Draft Outreach</span>
+      </button>
+      <button class="nav-item" id="nav-requests">
+        <span class="nav-icon">📋</span><span class="nav-text">Submit Request</span>
+      </button>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar" id="user-avatar">A</div>
+        <div>
+          <div class="user-name" id="user-name">Admin</div>
+          <div class="user-role" id="user-role">Platform member</div>
+        </div>
+      </div>
+      <button class="logout-btn" id="logout-btn" style="margin-top:8px">Sign out</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title" id="page-title">Open Opportunities</div>
+        <div class="topbar-sub" id="page-sub"></div>
+      </div>
+      <div class="topbar-right">
+        <div class="search-bar-wrap">
+          <span class="search-icon">🔍</span>
+          <input class="search-bar" id="global-search" type="search"
+            placeholder="Search opportunities, donors, signals…" maxlength="120" autocomplete="off">
+          <button class="search-clear" id="search-clear" title="Clear search">✕</button>
+        </div>
+        <div id="cause-filter-pills" class="filter-bar" style="margin-bottom:0;display:none"></div>
+      </div>
+    </div>
+    <div class="content" id="content-area"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>
