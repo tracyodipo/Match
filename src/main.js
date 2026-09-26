@@ -18,6 +18,21 @@ function sanitizeInput(str, maxLen) {
   return String(str || '').replace(/[<>'"]/g, '').trim().slice(0, maxLen || 500)
 }
 
+// ─── Deadline filtering ────────────────────────────────────────────────────────
+// An opportunity is shown when its deadline is today or in the future, OR when it
+// has no deadline / a non-date deadline like "Rolling deadline" or "Continuous".
+// Only a strict YYYY-MM-DD (optionally with a time suffix) is treated as a real
+// deadline; anything else — missing, "Rolling", "Continuous", etc. — stays visible.
+function isOpenByDeadline(o) {
+  const raw = o.deadline
+  if (!raw) return true
+  const isoMatch = /^(\d{4}-\d{2}-\d{2})/.exec(String(raw))
+  if (!isoMatch) return true
+  const todayISO = new Date().toISOString().slice(0, 10)
+  return isoMatch[1] >= todayISO
+}
+const openOpportunities = opportunities.filter(isOpenByDeadline)
+
 // ─── Static data (frozen after import) ───────────────────────────────────────
 const CAUSES = Object.freeze([
   { slug: 'affordable-housing', name: 'Affordable Housing' },
@@ -26,7 +41,9 @@ const CAUSES = Object.freeze([
   { slug: 'tech-for-good',      name: 'Tech for Good' },
   { slug: 'mental-health',      name: 'Mental Health' },
   { slug: 'education',          name: 'Education' },
-  { slug: 'arts-culture',       name: 'Arts & Culture' }
+  { slug: 'arts-culture',       name: 'Arts & Culture' },
+  { slug: 'neurodevelopmental', name: 'Neurodevelopmental Conditions' },
+  { slug: 'disabilities',       name: 'Disabilities' }
 ])
 
 const DEMO_USERS = Object.freeze([
@@ -118,7 +135,7 @@ function renderCausePills() {
 // ─── Page router ─────────────────────────────────────────────────────────────
 const pageConfig = {
   home:     { title: 'Welcome to PhilanthropyConnect', sub: 'Funding intelligence for grant-seekers', showPills: false },
-  opps:     { title: 'Open Opportunities', sub: `${opportunities.length} open funding opportunities across 7 cause areas`, showPills: true },
+  opps:     { title: 'Open Opportunities', sub: `${openOpportunities.length} open funding opportunities across ${CAUSES.length} cause areas`, showPills: true },
   signals:  { title: 'Donor Signals', sub: 'Open RFPs, pledges, and active giving windows', showPills: true },
   matches:  { title: 'Matches', sub: `${matchesRaw.filter(m => m.isNew).length} new donor↔opportunity matches with evidence`, showPills: true },
   outreach: { title: 'Draft Outreach', sub: 'Generate a tailored letter for any pairing', showPills: false },
@@ -180,7 +197,7 @@ function showHero() {
           Philanthropy intelligence,<br>built for grant-seekers.
         </h1>
         <p style="font-size:14px;color:var(--muted);line-height:1.7;max-width:480px;margin-bottom:24px">
-          Browse ${opportunities.length} open funding opportunities, track ${signals.filter(s => s.window === 'open').length} live donor signals, and surface new matches — then generate a tailored outreach letter in seconds.
+          Browse ${openOpportunities.length} open funding opportunities, track ${signals.filter(s => s.window === 'open').length} live donor signals, and surface new matches — then generate a tailored outreach letter in seconds.
         </p>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
           <button class="btn btn-primary" id="hero-opps" style="font-size:14px;padding:10px 22px">🎯 Browse opportunities</button>
@@ -190,7 +207,7 @@ function showHero() {
       </div>
     </div>
     <div class="stats-strip">
-      <div class="stat-card"><div class="stat-num green">${opportunities.length}</div><div class="stat-label">Open opportunities</div></div>
+      <div class="stat-card"><div class="stat-num green">${openOpportunities.length}</div><div class="stat-label">Open opportunities</div></div>
       <div class="stat-card"><div class="stat-num amber">${signals.filter(s => s.window === 'open').length}</div><div class="stat-label">Apply-now signals</div></div>
       <div class="stat-card"><div class="stat-num green">${matchesRaw.filter(m => m.isNew).length}</div><div class="stat-label">New matches</div></div>
       <div class="stat-card"><div class="stat-num">$1.7B+</div><div class="stat-label">Tracked giving</div></div>
@@ -203,7 +220,7 @@ function showHero() {
 
 // ─── Opportunities ────────────────────────────────────────────────────────────
 function renderOpps(el) {
-  const items = opportunities.filter(o => !state.cause || o.cause === state.cause)
+  const items = openOpportunities.filter(o => !state.cause || o.cause === state.cause)
   const statsDiv = document.createElement('div')
   statsDiv.className = 'stats-strip'
   statsDiv.innerHTML = `
@@ -354,7 +371,7 @@ function renderOutreach(el) {
           <div class="field-label">Opportunity</div>
           <select class="field-select" id="out-opp">
             <option value="">— Select opportunity —</option>
-            ${opportunities.map(o => `<option value="${esc(o.title)}" ${state.selectedOpp===o.title?'selected':''}>${esc(o.title.slice(0,60))}${o.title.length>60?'…':''}</option>`).join('')}
+            ${openOpportunities.map(o => `<option value="${esc(o.title)}" ${state.selectedOpp===o.title?'selected':''}>${esc(o.title.slice(0,60))}${o.title.length>60?'…':''}</option>`).join('')}
           </select>
         </div>
         <div>
@@ -553,7 +570,7 @@ function renderSearchResults() {
   const el = document.getElementById('content-area')
   el.innerHTML = ''
   const q = searchQuery
-  const oppHits = opportunities.map(o => ({ item: o, score: scoreItem([o.title,o.org,o.desc,o.location,causeName(o.cause)],q) })).filter(x=>x.score>0).sort((a,b)=>b.score-a.score)
+  const oppHits = openOpportunities.map(o => ({ item: o, score: scoreItem([o.title,o.org,o.desc,o.location,causeName(o.cause)],q) })).filter(x=>x.score>0).sort((a,b)=>b.score-a.score)
   const sigHits = signals.map(s => ({ item: s, score: scoreItem([s.title,s.donor,s.desc,causeName(s.cause),s.type,s.window],q) })).filter(x=>x.score>0).sort((a,b)=>b.score-a.score)
   const matchHits = matchesRaw.map(m => ({ item: m, score: scoreItem([m.donor,m.opp,m.rationale,causeName(m.cause)],q) })).filter(x=>x.score>0).sort((a,b)=>b.score-a.score)
   const total = oppHits.length + sigHits.length + matchHits.length
