@@ -25,6 +25,26 @@ Push to `main` → GitHub Actions builds and deploys to GitHub Pages automatical
 Edit any file in `/data/*.json` and push to `main` — the pipeline rebuilds automatically.
 No code changes needed.
 
+A scheduled task refreshes `data/opportunities.json` every two weeks with newly
+published open funding opportunities (see `data/opportunities.json` schema below
+for the `deadline` field it relies on).
+
+### Opportunity deadlines & visibility
+
+Each entry in `data/opportunities.json` may include a `deadline` field:
+
+- `"deadline": "2026-08-21"` (a `YYYY-MM-DD` date) — the opportunity is shown on
+  the Open Opportunities page, in search, and in the outreach picker only while
+  that date is today or in the future. Once the date passes, it's automatically
+  hidden — no manual removal needed.
+- `"deadline": null`, `"deadline": "Rolling deadline"`, `"deadline": "Continuous"`,
+  or the field omitted entirely — always shown, since there's no hard cutoff.
+
+This filtering happens in `src/main.js` (`isOpenByDeadline`), so expired entries
+can stay in the JSON file for historical reference without cluttering the UI —
+though the biweekly update also prunes opportunities that have been closed for
+a while to keep the file tidy.
+
 ## Architecture
 
 ```
