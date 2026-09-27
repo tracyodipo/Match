@@ -192,14 +192,22 @@ function showHero() {
   hero.style.cssText = 'max-width:680px;margin:0 auto;padding:20px 0 40px'
   hero.innerHTML = `
     <div style="background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);margin-bottom:28px">
-      <div style="padding:32px 40px 36px">
-        <h1 style="font-family:var(--serif);font-size:28px;color:var(--ink);line-height:1.25;margin-bottom:12px">
-          Philanthropy intelligence,<br>built for grant-seekers.
+      <div style="padding:40px 40px 36px;text-align:center">
+        <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:18px">
+          <div style="position:relative;width:30px;height:18px">
+            <div style="position:absolute;left:0;top:0;width:18px;height:18px;border-radius:50%;border:2px solid var(--ink)"></div>
+            <div style="position:absolute;left:12px;top:0;width:18px;height:18px;border-radius:50%;border:2px solid var(--green);mix-blend-mode:multiply"></div>
+          </div>
+          <span style="font-size:11px;font-weight:600;letter-spacing:.18em;color:var(--ink)">PHILANTHROPY CONNECT</span>
+        </div>
+        <h1 style="font-family:var(--serif);line-height:1;margin-bottom:4px">
+          <span style="display:block;font-style:italic;font-size:56px;color:var(--ink)">Match</span>
+          <span style="display:block;font-size:32px;color:var(--green);margin-top:2px">your need.</span>
         </h1>
-        <p style="font-size:14px;color:var(--muted);line-height:1.7;max-width:480px;margin-bottom:24px">
+        <p style="font-size:14px;color:var(--muted);line-height:1.7;max-width:440px;margin:16px auto 24px">
           Browse ${openOpportunities.length} open funding opportunities, track ${signals.filter(s => s.window === 'open').length} live donor signals, and surface new matches — then generate a tailored outreach letter in seconds.
         </p>
-        <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
           <button class="btn btn-primary" id="hero-opps" style="font-size:14px;padding:10px 22px">🎯 Browse opportunities</button>
           <button class="btn" id="hero-signals" style="font-size:14px;padding:10px 22px">⚡ View donor signals</button>
           <button class="btn" id="hero-matches" style="font-size:14px;padding:10px 22px">🔗 See matches</button>
