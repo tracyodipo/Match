@@ -33,8 +33,11 @@ html, body { height: 100%; font-family: var(--sans); background: var(--body-bg);
   display: flex; align-items: center; justify-content: center; z-index: 1000;
   transition: opacity .4s;
 }
-#auth-screen.hidden { opacity: 0; pointer-events: none; }
+#auth-screen.hidden { opacity: 0; pointer-events: none; visibility: hidden; transition: opacity .4s, visibility 0s .4s; }
+.auth-close { position: absolute; top: 14px; right: 16px; background: none; border: none; color: rgba(255,255,255,.4); font-size: 16px; cursor: pointer; }
+.auth-close:hover { color: #fff; }
 .auth-card {
+  position: relative;
   background: var(--slate2); border: 1px solid rgba(255,255,255,.08);
   border-radius: 14px; padding: 48px 44px; width: 100%; max-width: 400px;
   box-shadow: 0 24px 64px rgba(0,0,0,.5);
@@ -257,3 +260,8 @@ mark { background: #FFF3B0; color: var(--ink); border-radius: 2px; padding: 0 1p
   .outreach-grid { grid-template-columns: 1fr; }
   .sidebar { position: fixed; z-index: 100; }
 }
+/* ── Public view: AI drafting is admin-only unless PUBLIC_OUTREACH is on ── */
+body.no-draft #nav-outreach,
+body.no-draft .draft-btn,
+body.no-draft .donor-btn,
+body.no-draft .match-draft-btn { display: none !important; }

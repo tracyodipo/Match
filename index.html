@@ -13,10 +13,11 @@
 <body>
 
 <!-- ═══ AUTH ═══════════════════════════════════════════════════════════════ -->
-<div id="auth-screen">
+<div id="auth-screen" class="hidden" role="dialog" aria-modal="true" aria-label="Admin sign in">
   <div class="auth-card">
+    <button class="auth-close" id="auth-close" title="Close" aria-label="Close">✕</button>
     <div class="auth-logo">Philanthropy<span>Connect</span></div>
-    <div class="auth-tagline">Funding intelligence for grant-seekers</div>
+    <div class="auth-tagline">Admin &amp; member sign in</div>
     <div class="auth-field">
       <label class="auth-label" for="auth-email">Email</label>
       <input class="auth-input" id="auth-email" type="email" placeholder="you@organization.org" autocomplete="username">
@@ -27,12 +28,11 @@
     </div>
     <button class="auth-btn" id="login-btn">Sign in</button>
     <div class="auth-error" id="auth-error"></div>
-    <div class="auth-hint">Demo: admin@philanthropyconnect.org / connect2026</div>
   </div>
 </div>
 
 <!-- ═══ APP SHELL ══════════════════════════════════════════════════════════ -->
-<div id="app">
+<div id="app" class="visible">
 
   <div class="sidebar sidebar-rel" id="sidebar">
     <div class="sidebar-top">
@@ -73,13 +73,14 @@
 
     <div class="sidebar-footer">
       <div class="user-info">
-        <div class="user-avatar" id="user-avatar">A</div>
+        <div class="user-avatar" id="user-avatar">G</div>
         <div>
-          <div class="user-name" id="user-name">Admin</div>
-          <div class="user-role" id="user-role">Platform member</div>
+          <div class="user-name" id="user-name">Guest</div>
+          <div class="user-role" id="user-role">Public access</div>
         </div>
       </div>
-      <button class="logout-btn" id="logout-btn" style="margin-top:8px">Sign out</button>
+      <button class="logout-btn" id="login-open-btn" style="margin-top:8px">Admin sign in</button>
+      <button class="logout-btn" id="logout-btn" style="margin-top:8px;display:none">Sign out</button>
     </div>
   </div>
 

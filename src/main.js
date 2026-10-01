@@ -51,8 +51,38 @@ const DEMO_USERS = Object.freeze([
   { email: 'grants@hopeclinic.org',         pass: 'hope2026',    name: 'HopeClinic Team', role: 'Member org' }
 ])
 
-// ─── Auth ─────────────────────────────────────────────────────────────────────
+// ─── Access ───────────────────────────────────────────────────────────────────
+// The portal is public by default. Signing in as an admin/member is optional and
+// unlocks AI outreach drafting (which spends Anthropic API credit via the proxy).
+// Set PUBLIC_OUTREACH = true to open Draft Outreach to everyone as well.
+// NOTE: this is a client-side gate only — it keeps the UI tidy, it is not a security
+// boundary. Protect the proxy itself (CORS + rate limits) to control API spend.
+const PUBLIC_OUTREACH = false
+
 let SESSION = null
+
+function canDraft() { return PUBLIC_OUTREACH || !!SESSION }
+
+function applyAccess() {
+  document.body.classList.toggle('no-draft', !canDraft())
+  document.getElementById('user-name').textContent = SESSION ? SESSION.name : 'Guest'
+  document.getElementById('user-role').textContent = SESSION ? SESSION.role : 'Public access'
+  document.getElementById('user-avatar').textContent = SESSION ? SESSION.name[0].toUpperCase() : 'G'
+  document.getElementById('login-open-btn').style.display = SESSION ? 'none' : ''
+  document.getElementById('logout-btn').style.display = SESSION ? '' : 'none'
+}
+
+function openLogin() {
+  document.getElementById('auth-screen').classList.remove('hidden')
+  document.getElementById('auth-email').focus()
+}
+
+function closeLogin() {
+  document.getElementById('auth-screen').classList.add('hidden')
+  document.getElementById('auth-email').value = ''
+  document.getElementById('auth-pass').value = ''
+  document.getElementById('auth-error').textContent = ''
+}
 
 function handleLogin() {
   const email = sanitizeInput(document.getElementById('auth-email').value, 100).toLowerCase()
@@ -62,28 +92,28 @@ function handleLogin() {
   const user = DEMO_USERS.find(u => u.email === email && u.pass === pass)
   if (!user) { errEl.textContent = 'Email or password is incorrect.'; return }
   SESSION = { name: user.name, role: user.role, email: user.email }
-  document.getElementById('auth-screen').classList.add('hidden')
-  document.getElementById('app').classList.add('visible')
-  document.getElementById('user-name').textContent = user.name
-  document.getElementById('user-role').textContent = user.role
-  document.getElementById('user-avatar').textContent = user.name[0].toUpperCase()
-  showHero()
+  closeLogin()
+  applyAccess()
+  showToast('Signed in as ' + user.name)
 }
 
 function handleLogout() {
   SESSION = null
-  document.getElementById('auth-screen').classList.remove('hidden')
-  document.getElementById('app').classList.remove('visible')
-  document.getElementById('auth-email').value = ''
-  document.getElementById('auth-pass').value = ''
-  document.getElementById('auth-error').textContent = ''
+  applyAccess()
+  if (currentPage === 'outreach' && !canDraft()) showHero()
 }
 
 document.getElementById('auth-pass').addEventListener('keydown', e => {
   if (e.key === 'Enter') handleLogin()
 })
 document.getElementById('login-btn').addEventListener('click', handleLogin)
+document.getElementById('login-open-btn').addEventListener('click', openLogin)
+document.getElementById('auth-close').addEventListener('click', closeLogin)
+document.getElementById('auth-screen').addEventListener('click', e => { if (e.target.id === 'auth-screen') closeLogin() })
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLogin() })
 document.getElementById('logout-btn').addEventListener('click', handleLogout)
+// Direct link for admins: https://your-site/#admin opens the sign-in dialog
+if (location.hash === '#admin') openLogin()
 
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
 let sidebarCollapsed = false
@@ -143,6 +173,7 @@ const pageConfig = {
 }
 
 function showPage(page) {
+  if (page === 'outreach' && !canDraft()) { openLogin(); return }
   currentPage = page
   searchQuery = ''
   document.getElementById('global-search').value = ''
@@ -421,6 +452,7 @@ function prefillOutreachDonor(donor) { state.selectedDonor = donor; showPage('ou
 function prefillOutreachMatch(donor, opp) { state.selectedDonor = donor; state.selectedOpp = opp; showPage('outreach') }
 
 async function generateLetter() {
+  if (!canDraft()) { openLogin(); return }
   const opp   = document.getElementById('out-opp')?.value
   const donor = document.getElementById('out-donor')?.value
   if (!opp || !donor) { showToast('Please select an opportunity and a donor first.'); return }
@@ -634,3 +666,11 @@ function clearSearch() {
   showPage(currentPage)
   document.getElementById('global-search').focus()
 }
+
+// ─── Boot: public landing page ────────────────────────────────────────────────
+// Sidebar badge counts come from the data, not the HTML (index.html values are placeholders)
+document.querySelector('#nav-opps .nav-badge').textContent = openOpportunities.length
+document.querySelector('#nav-signals .nav-badge').textContent = signals.length
+document.querySelector('#nav-matches .nav-badge').textContent = matchesRaw.length
+applyAccess()
+showHero()
