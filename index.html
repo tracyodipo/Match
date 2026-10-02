@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Content-Security-Policy"
-  content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' https://YOUR_PROXY_URL; img-src 'self' data:;">
+  content="default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' https://YOUR_PROXY_URL https://cloudflareinsights.com; img-src 'self' data:;">
 <title>Philanthropy Connect — Platform</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -107,5 +107,10 @@
 <div class="toast" id="toast"></div>
 
 <script type="module" src="/src/main.js"></script>
+
+<!-- Cloudflare Web Analytics (cookieless). Replace the token with the one from
+     Cloudflare dashboard → Web Analytics → your site → "Manage site". -->
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js"
+  data-cf-beacon='{"token": "YOUR_CLOUDFLARE_BEACON_TOKEN"}'></script>
 </body>
 </html>
