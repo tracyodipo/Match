@@ -38,7 +38,7 @@
     <div class="sidebar-top">
       <div class="sidebar-brand">Philanthropy<span>Connect</span></div>
     </div>
-    <button class="sidebar-toggle" id="sidebar-toggle" title="Toggle sidebar">⟨</button>
+    <button class="sidebar-toggle" id="sidebar-toggle" title="Toggle sidebar" aria-label="Toggle sidebar">⟨</button>
 
     <div class="nav-section">
       <div class="nav-label">Home</div>
@@ -84,8 +84,11 @@
     </div>
   </div>
 
+  <div class="sidebar-backdrop" id="sidebar-backdrop" aria-hidden="true"></div>
+
   <div class="main">
     <div class="topbar">
+      <button class="menu-btn" id="menu-btn" aria-label="Open navigation menu" aria-expanded="false" aria-controls="sidebar">☰</button>
       <div>
         <div class="topbar-title" id="page-title">Open Opportunities</div>
         <div class="topbar-sub" id="page-sub"></div>

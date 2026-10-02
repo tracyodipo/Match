@@ -123,6 +123,35 @@ document.getElementById('sidebar-toggle').addEventListener('click', () => {
   document.getElementById('sidebar-toggle').textContent = sidebarCollapsed ? '⟩' : '⟨'
 })
 
+// ─── Mobile nav drawer (≤768px) ───────────────────────────────────────────────
+const mobileMq = window.matchMedia('(max-width: 768px)')
+const drawerSidebar = document.getElementById('sidebar')
+const drawerBackdrop = document.getElementById('sidebar-backdrop')
+const menuBtn = document.getElementById('menu-btn')
+
+function isMobileNav() { return mobileMq.matches }
+
+function openMobileNav() {
+  if (!isMobileNav()) return
+  drawerSidebar.classList.add('mobile-open')
+  drawerBackdrop.classList.add('visible')
+  document.body.classList.add('nav-open')
+  menuBtn.setAttribute('aria-expanded', 'true')
+}
+
+function closeMobileNav() {
+  drawerSidebar.classList.remove('mobile-open')
+  drawerBackdrop.classList.remove('visible')
+  document.body.classList.remove('nav-open')
+  menuBtn.setAttribute('aria-expanded', 'false')
+}
+
+menuBtn.addEventListener('click', () => {
+  drawerSidebar.classList.contains('mobile-open') ? closeMobileNav() : openMobileNav()
+})
+drawerBackdrop.addEventListener('click', closeMobileNav)
+mobileMq.addEventListener('change', closeMobileNav)
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function fmtAmt(a) {
   if (!a) return ''
@@ -184,6 +213,7 @@ function showPage(page) {
   document.getElementById('cause-filter-pills').style.display = cfg.showPills ? 'flex' : 'none'
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'))
   document.getElementById('nav-' + page)?.classList.add('active')
+  closeMobileNav()
   renderCausePills()
   renderCurrentPage()
 }
@@ -216,6 +246,7 @@ function showHero() {
   document.getElementById('cause-filter-pills').style.display = 'none'
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'))
   document.getElementById('nav-home')?.classList.add('active')
+  closeMobileNav()
   const el = document.getElementById('content-area')
   el.innerHTML = ''
 
