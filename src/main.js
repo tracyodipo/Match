@@ -4,6 +4,7 @@
 import opportunities from '../data/opportunities.json'
 import signals from '../data/signals.json'
 import matchesRaw from '../data/matches.json'
+import causesRaw from '../data/causes.json'
 
 // ─── Config injected at build time via vite.config.js define ─────────────────
 const PROXY_URL = __PROXY_URL__
@@ -34,17 +35,11 @@ function isOpenByDeadline(o) {
 const openOpportunities = opportunities.filter(isOpenByDeadline)
 
 // ─── Static data (frozen after import) ───────────────────────────────────────
-const CAUSES = Object.freeze([
-  { slug: 'affordable-housing', name: 'Affordable Housing' },
-  { slug: 'global-health',      name: 'Global Health' },
-  { slug: 'food-security',      name: 'Food Security' },
-  { slug: 'tech-for-good',      name: 'Tech for Good' },
-  { slug: 'mental-health',      name: 'Mental Health' },
-  { slug: 'education',          name: 'Education' },
-  { slug: 'arts-culture',       name: 'Arts & Culture' },
-  { slug: 'neurodevelopmental', name: 'Neurodevelopmental Conditions' },
-  { slug: 'disabilities',       name: 'Disabilities' }
-])
+// Cause areas live in data/causes.json. `featured` causes keep their original pill order;
+// every other cause is listed A–Z in the "More cause areas" dropdown.
+const CAUSES = Object.freeze(causesRaw.map(c => ({ slug: c.slug, name: c.name, featured: !!c.featured })))
+const FEATURED_CAUSES = CAUSES.filter(c => c.featured)
+const MORE_CAUSES = CAUSES.filter(c => !c.featured).sort((a, b) => a.name.localeCompare(b.name))
 
 const DEMO_USERS = Object.freeze([
   { email: 'admin@philanthropyconnect.org', pass: 'connect2026', name: 'Admin', role: 'Platform admin' },
@@ -171,16 +166,24 @@ function showToast(msg) {
 }
 
 // ─── State ────────────────────────────────────────────────────────────────────
-let state = { cause: '', signalWindow: 'open', matchFilter: 'new', tone: 'Formal', selectedOpp: '', selectedDonor: '' }
+let state = { cause: '', signalWindow: 'open', matchFilter: 'new', tone: 'Formal', selectedOpp: '', selectedDonor: '', groupByCause: false }
 let currentPage = 'home'
 let searchQuery = ''
 let searchDebounceTimer = null
 let currentLetter = ''
 
 // ─── Cause pills ─────────────────────────────────────────────────────────────
+// Number of entries per cause on the page being viewed (opportunities, signals or matches)
+function causeCounts() {
+  const src = currentPage === 'signals' ? signals : currentPage === 'matches' ? matchesRaw : openOpportunities
+  const counts = {}
+  src.forEach(item => { counts[item.cause] = (counts[item.cause] || 0) + 1 })
+  return counts
+}
+
 function renderCausePills() {
   const el = document.getElementById('cause-filter-pills')
-  const all = [{ slug: '', name: 'All' }, ...CAUSES]
+  const all = [{ slug: '', name: 'All' }, ...FEATURED_CAUSES]
   el.innerHTML = ''
   all.forEach(c => {
     const btn = document.createElement('button')
@@ -189,12 +192,36 @@ function renderCausePills() {
     btn.addEventListener('click', () => { state.cause = c.slug; renderCausePills(); renderCurrentPage() })
     el.appendChild(btn)
   })
+  if (MORE_CAUSES.length) {
+    const counts = causeCounts()
+    const sel = document.createElement('select')
+    sel.className = 'filter-select cause-more'
+    sel.setAttribute('aria-label', 'More cause areas')
+    const placeholder = document.createElement('option')
+    placeholder.value = ''
+    placeholder.textContent = 'More cause areas (A–Z)…'
+    placeholder.disabled = true
+    placeholder.selected = !MORE_CAUSES.some(c => c.slug === state.cause)
+    sel.appendChild(placeholder)
+    MORE_CAUSES.forEach(c => {
+      const n = counts[c.slug] || 0
+      const opt = document.createElement('option')
+      opt.value = c.slug
+      opt.textContent = `${c.name} (${n})`
+      opt.disabled = n === 0 && state.cause !== c.slug
+      opt.selected = state.cause === c.slug
+      sel.appendChild(opt)
+    })
+    sel.classList.toggle('active', MORE_CAUSES.some(c => c.slug === state.cause))
+    sel.addEventListener('change', () => { state.cause = sel.value; renderCausePills(); renderCurrentPage() })
+    el.appendChild(sel)
+  }
 }
 
 // ─── Page router ─────────────────────────────────────────────────────────────
 const pageConfig = {
   home:     { title: 'Welcome to PhilanthropyConnect', sub: 'Funding intelligence for grant-seekers', showPills: false },
-  opps:     { title: 'Open Opportunities', sub: `${openOpportunities.length} open funding opportunities across ${CAUSES.length} cause areas`, showPills: true },
+  opps:     { title: 'Open Opportunities', sub: `${openOpportunities.length} open funding opportunities across ${new Set(openOpportunities.map(o => o.cause)).size} cause areas`, showPills: true },
   signals:  { title: 'Donor Signals', sub: 'Open RFPs, pledges, and active giving windows', showPills: true },
   matches:  { title: 'Matches', sub: `${matchesRaw.filter(m => m.isNew).length} new donor↔opportunity matches with evidence`, showPills: true },
   outreach: { title: 'Draft Outreach', sub: 'Generate a tailored letter for any pairing', showPills: false },
@@ -289,23 +316,10 @@ function showHero() {
 }
 
 // ─── Opportunities ────────────────────────────────────────────────────────────
-function renderOpps(el) {
-  const items = openOpportunities.filter(o => !state.cause || o.cause === state.cause)
-  const statsDiv = document.createElement('div')
-  statsDiv.className = 'stats-strip'
-  statsDiv.innerHTML = `
-    <div class="stat-card"><div class="stat-num green">${items.length}</div><div class="stat-label">Showing</div></div>
-    <div class="stat-card"><div class="stat-num">${fmtAmt(items.reduce((s,o) => s+(o.amount||0),0))}</div><div class="stat-label">Total funding</div></div>
-    <div class="stat-card"><div class="stat-num amber">${items.filter(o=>o.type==='capital_campaign').length}</div><div class="stat-label">Capital campaigns</div></div>
-    <div class="stat-card"><div class="stat-num">${[...new Set(items.map(o=>o.cause))].length}</div><div class="stat-label">Cause areas</div></div>`
-  el.appendChild(statsDiv)
-  const list = document.createElement('div')
-  list.className = 'card-list'
-  if (!items.length) { list.innerHTML = '<div class="empty"><div class="empty-icon">🔍</div>No opportunities match this filter.</div>' }
-  items.forEach(o => {
-    const card = document.createElement('div')
-    card.className = 'opp-card'
-    card.innerHTML = `
+function oppCard(o) {
+  const card = document.createElement('div')
+  card.className = 'opp-card'
+  card.innerHTML = `
       <div class="card-header">
         <div><div class="card-title">${esc(o.title)}</div><div class="card-org">${esc(o.org)}</div></div>
         ${o.amount ? `<div class="amount-badge ml-auto">${fmtAmt(o.amount)}</div>` : ''}
@@ -318,11 +332,71 @@ function renderOpps(el) {
         <a href="${esc(o.url)}" target="_blank" rel="noopener noreferrer" class="link-btn ml-auto">Apply / RFP ↗</a>
         <button class="btn btn-sm btn-primary draft-btn" data-opp="${esc(o.title)}">Draft outreach</button>
       </div>`
-    list.appendChild(card)
-  })
-  el.appendChild(list)
+  return card
+}
+
+// Donors with a signal or match in this cause area, A–Z
+function donorsForCause(slug) {
+  const names = new Set()
+  matchesRaw.forEach(m => { if (m.cause === slug) names.add(m.donor) })
+  signals.forEach(s => { if (s.cause === slug) names.add(s.donor) })
+  return [...names].sort((a, b) => a.localeCompare(b))
+}
+
+function renderOpps(el) {
+  const items = openOpportunities.filter(o => !state.cause || o.cause === state.cause)
+  const filterRow = document.createElement('div')
+  filterRow.className = 'filter-bar'
+  filterRow.style.marginBottom = '16px'
+  const groupBtn = document.createElement('button')
+  groupBtn.className = 'cause-pill' + (state.groupByCause ? ' active' : '')
+  groupBtn.textContent = 'Group by cause (A–Z)'
+  groupBtn.setAttribute('aria-pressed', String(state.groupByCause))
+  groupBtn.addEventListener('click', () => { state.groupByCause = !state.groupByCause; renderCurrentPage() })
+  filterRow.appendChild(groupBtn)
+  el.appendChild(filterRow)
+  const statsDiv = document.createElement('div')
+  statsDiv.className = 'stats-strip'
+  statsDiv.innerHTML = `
+    <div class="stat-card"><div class="stat-num green">${items.length}</div><div class="stat-label">Showing</div></div>
+    <div class="stat-card"><div class="stat-num">${fmtAmt(items.reduce((s,o) => s+(o.amount||0),0))}</div><div class="stat-label">Total funding</div></div>
+    <div class="stat-card"><div class="stat-num amber">${items.filter(o=>o.type==='capital_campaign').length}</div><div class="stat-label">Capital campaigns</div></div>
+    <div class="stat-card"><div class="stat-num">${[...new Set(items.map(o=>o.cause))].length}</div><div class="stat-label">Cause areas</div></div>`
+  el.appendChild(statsDiv)
+  if (state.groupByCause && items.length) {
+    // One section per cause area (A–Z): its open opportunities, then its matched donors
+    const groups = {}
+    items.forEach(o => { (groups[o.cause] = groups[o.cause] || []).push(o) })
+    Object.keys(groups).sort((a, b) => causeName(a).localeCompare(causeName(b))).forEach(slug => {
+      const head = document.createElement('div')
+      head.className = 'search-section-head'
+      head.textContent = `${causeName(slug)} (${groups[slug].length})`
+      el.appendChild(head)
+      const list = document.createElement('div')
+      list.className = 'card-list'
+      groups[slug].forEach(o => list.appendChild(oppCard(o)))
+      el.appendChild(list)
+      const donors = donorsForCause(slug)
+      const row = document.createElement('div')
+      row.className = 'cause-donors'
+      row.innerHTML = '<span class="donor-label">Matched donors</span>' +
+        (donors.length
+          ? donors.map(d => `<button class="donor-chip" data-donor="${esc(d)}">${esc(d)}</button>`).join('')
+          : '<span class="donor-none">None matched yet</span>')
+      el.appendChild(row)
+    })
+  } else {
+    const list = document.createElement('div')
+    list.className = 'card-list'
+    if (!items.length) { list.innerHTML = '<div class="empty"><div class="empty-icon">🔍</div>No opportunities match this filter.</div>' }
+    items.forEach(o => list.appendChild(oppCard(o)))
+    el.appendChild(list)
+  }
   el.querySelectorAll('.draft-btn').forEach(btn => {
     btn.addEventListener('click', () => prefillOutreach(btn.dataset.opp))
+  })
+  el.querySelectorAll('.donor-chip').forEach(btn => {
+    btn.addEventListener('click', () => prefillOutreachDonor(btn.dataset.donor))
   })
 }
 
