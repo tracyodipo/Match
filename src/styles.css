@@ -140,6 +140,15 @@ html, body { height: 100%; font-family: var(--sans); background: var(--body-bg);
 .cause-pill:hover { border-color: var(--green); color: var(--green); }
 .cause-pill.active { background: var(--green); color: #fff; border-color: var(--green); }
 .filter-select { padding: 5px 10px; border: 1px solid var(--border); border-radius: var(--radius); background: #fff; font-family: var(--sans); font-size: 12px; color: var(--ink); cursor: pointer; }
+.filter-select.cause-more { border-radius: 99px; padding: 5px 12px; color: var(--muted); }
+.filter-select.cause-more:hover { border-color: var(--green); color: var(--green); }
+.filter-select.cause-more.active { background: var(--green); color: #fff; border-color: var(--green); }
+.filter-select.cause-more.active option { color: var(--ink); }
+.cause-donors { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: -4px 0 22px; padding: 10px 14px; background: var(--sage); border-radius: var(--radius); }
+.donor-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--green2); margin-right: 4px; }
+.donor-chip { padding: 3px 10px; border-radius: 99px; border: 1px solid var(--border); background: #fff; font-family: var(--sans); font-size: 12px; color: var(--ink); cursor: pointer; transition: all .15s; }
+.donor-chip:hover { border-color: var(--green); color: var(--green); }
+.donor-none { font-size: 12px; color: var(--muted); }
 
 /* ── Cards ──────────────────────────────────────────── */
 .card-list { display: flex; flex-direction: column; gap: 10px; }

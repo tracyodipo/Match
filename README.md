@@ -45,6 +45,19 @@ can stay in the JSON file for historical reference without cluttering the UI —
 though the biweekly update also prunes opportunities that have been closed for
 a while to keep the file tidy.
 
+### Cause areas, donors and matches
+
+Cause areas live in `data/causes.json` (`slug`, `name`, and `"featured": true` for the
+nine original causes, which keep their pill order). Every other cause is listed A–Z in the
+"More cause areas" dropdown with a count for the page being viewed; causes with no entries
+yet are disabled. Every `cause` value in `opportunities.json`, `signals.json` and
+`matches.json` must be a slug from `causes.json`.
+
+For each open opportunity, add a donor to `signals.json` (the funder's open or announced
+program, with an evidence `url`) and a pairing to `matches.json` whose `opp` equals the
+opportunity `title` exactly. On the Open Opportunities page, **Group by cause (A–Z)** shows
+each cause with its opportunities followed by its matched donors.
+
 ## Architecture
 
 ```
@@ -52,7 +65,8 @@ GitHub repo
 ├── data/
 │   ├── opportunities.json   ← edit to add/update opportunities
 │   ├── signals.json         ← edit to add/update donor signals
-│   └── matches.json         ← edit to add/update matches
+│   ├── matches.json         ← edit to add/update matches
+│   └── causes.json          ← cause-area taxonomy (slug + display name)
 ├── src/
 │   ├── main.js              ← all app logic
 │   └── styles.css           ← all styles
